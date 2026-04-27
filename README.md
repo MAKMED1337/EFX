@@ -1,0 +1,1 @@
+To run `.cpp` files use `./run-cpp.sh {NAME}`. The main file is `main.cpp` it contains z3 proover for EFX problem with $N$ people and $M$ items, they can be modified inside the code. After it finished it will generate a z3 proof inside the `proofs/` directory and print its name.
