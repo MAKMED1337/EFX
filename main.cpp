@@ -100,6 +100,7 @@ void print(z3::model m) {
 }
 
 z3::solver get_solver(z3::context &ctx) {
+#ifdef PROOF
     z3::tactic simplify = z3::tactic(ctx, "simplify");
     z3::tactic solve_eqs = z3::tactic(ctx, "solve-eqs");
     z3::tactic blast_ite = z3::tactic(ctx, "blast-term-ite");
@@ -109,13 +110,19 @@ z3::solver get_solver(z3::context &ctx) {
     // Combine them into a sequence
     z3::tactic t = simplify & solve_eqs & blast_ite & propagate & smtt;
     return t.mk_solver();
-
-    // z3::solver solver = z3::solver(ctx);
+#else
+    return z3::solver(ctx);
+#endif
 }
 
 int main() {
+#ifdef PROOF
     // Enable proof generation globally.
+    std::cout << "Proof generation ENABLED" << std::endl;
     z3::set_param("proof", "true");
+#else
+    std::cout << "Proof generation DISABLED" << std::endl;
+#endif
 
     z3::context ctx;
     z3::solver solver = get_solver(ctx);
@@ -171,12 +178,14 @@ int main() {
     if (result == z3::unsat) {
         std::cout << "No counterexample :(" << std::endl;
         // Attempt to get proof (may throw if Z3 doesn't support it for LRA).
+#ifdef PROOF
         z3::expr proof = solver.proof();
         std::string proof_name = "proofs/proof_" + std::to_string(N) + "_" + std::to_string(M) + ".z3";
         std::ofstream proof_file(proof_name);
         proof_file << proof << std::endl;
         proof_file.close();
         std::cout << "Proof saved to " << proof_name << std::endl;
+#endif
     } else if (result == z3::sat) {
         std::cout << "Counterexample found:" << std::endl;
         z3::model m = solver.get_model();
