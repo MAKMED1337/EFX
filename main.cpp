@@ -9,8 +9,9 @@
 #include <vector>
 #include <z3++.h>
 
-const int N = 4; // number of agents
-const int M = 8; // number of items
+const int N = 4;                // number of agents
+const int M = 8;                // number of items
+const bool USE_SYMMETRY = true; // goods-relabelling symmetry break; set false to verify unsorted
 
 // Encode the envy-freeness condition for a given partition.
 // Returns a Z3 Boolean expression that is true iff the partition is envy-free
@@ -147,9 +148,12 @@ int main() {
         }
     }
 
-    // First agent's weights sorted.
-    for (int j = 0; j < M - 1; ++j) {
-        solver.add(w[0][j] <= w[0][j + 1]);
+    // First agent's weights sorted (goods-relabelling symmetry break).
+    // Set USE_SYMMETRY=false to disable it (much slower; for cross-checking).
+    if (USE_SYMMETRY) {
+        for (int j = 0; j < M - 1; ++j) {
+            solver.add(w[0][j] <= w[0][j + 1]);
+        }
     }
 
     // Generate partitions.

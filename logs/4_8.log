@@ -1,0 +1,9 @@
+Proof generation DISABLED
+N=4 M=8
+Available hardware threads: 144
+Number of partitions = 40824
+SMT‑LIB2 script saved to proofs/problem_4_8.smt2
+Solving...
+No counterexample :(
+225139.75user 27.36system 62:34:22elapsed 99%CPU (0avgtext+0avgdata 415360maxresident)k
+176inputs+0outputs (2major+1947448minor)pagefaults 0swaps

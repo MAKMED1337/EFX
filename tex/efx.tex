@@ -1,0 +1,801 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{booktabs}
+\usepackage{microtype}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage[backend=biber,style=numeric,sorting=nyt,maxbibnames=99]{biblatex}
+\usepackage[hidelinks]{hyperref}
+
+\addbibresource{efx.bib}
+
+% ---- theorem environments --------------------------------------------------
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}
+\newtheorem{corollary}{Corollary}
+\newtheorem{proposition}{Proposition}
+\newtheorem{observation}{Observation}
+
+% ---- listing style ---------------------------------------------------------
+\definecolor{codekw}{rgb}{0.10,0.10,0.65}
+\definecolor{codecm}{rgb}{0.30,0.45,0.30}
+\definecolor{codebg}{rgb}{0.97,0.97,0.97}
+\lstdefinestyle{code}{
+  basicstyle=\ttfamily\footnotesize,
+  keywordstyle=\color{codekw}\bfseries,
+  commentstyle=\color{codecm}\itshape,
+  backgroundcolor=\color{codebg},
+  numberstyle=\tiny\color{gray},
+  numbers=left,
+  numbersep=7pt,
+  frame=single,
+  framerule=0.3pt,
+  rulecolor=\color{gray!50},
+  breaklines=true,
+  showstringspaces=false,
+  columns=fullflexible,
+  keepspaces=true,
+  tabsize=2,
+}
+\lstset{style=code}
+
+% ---- macros ----------------------------------------------------------------
+\newcommand{\EFX}{\textsf{EFX}}
+\newcommand{\EFone}{\textsf{EF1}}
+\newcommand{\agents}{N}
+\newcommand{\goods}{M}
+\newcommand{\val}[1]{v_{#1}}
+
+\title{\textbf{Full \EFX{} Allocations Exist for Four Agents and Eight Goods\\
+with Additive Valuations}}
+\author{Eduard Tykhoniuk}
+\date{June 2026}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+The existence of \emph{envy-free up to any good} (\EFX) allocations is one of the
+central open problems in the fair division of indivisible goods. It is known to
+hold for two agents with general valuations and for three agents with additive
+valuations; for four agents it is known to hold
+\emph{almost} fully --- an \EFX{} allocation always exists if one item may be
+left unallocated. Whether a \emph{full} (complete) \EFX{} allocation always
+exists for four agents remains open. In this report we settle the question
+\emph{for a fixed instance size}: we show that every \textbf{additive} profile
+with four agents and eight goods admits a full \EFX{} allocation. The argument
+reduces the existence statement to a single satisfiability query over linear real
+arithmetic: the negation of \EFX{} existence is satisfiable if and only if a
+counterexample profile exists. We encode this query with the Z3 SMT solver and
+exploit a goods-relabelling symmetry that, as we verify empirically, is needed for
+the larger instances to finish; after roughly $62.5$ hours the solver returns
+\texttt{unsat}.
+To the best of our knowledge this is the first verification of full \EFX{}
+existence for four agents and eight goods under additive valuations.
+\end{abstract}
+
+\tableofcontents
+\medskip
+\hrule
+
+\section{Introduction}
+\label{sec:intro}
+
+\emph{Fair division} studies how to partition a set of resources among agents
+with possibly conflicting preferences so that the outcome is, in some precise
+sense, fair. When the resources are \emph{indivisible goods} --- items that
+cannot be split, such as houses, courses, tasks, or shifts --- the classical
+benchmark of \emph{envy-freeness} (no agent prefers another agent's bundle to
+its own) is generally unachievable: with one good and two agents, whoever leaves
+empty-handed envies the other. Research has therefore concentrated on
+\emph{relaxations} of envy-freeness that are achievable yet still meaningful.
+
+The most prominent relaxations are \emph{envy-free up to one good} (\EFone) and
+\emph{envy-free up to any good} (\EFX). Under \EFone{} an agent may envy another,
+provided the envy disappears once \emph{some} single good is removed from the
+envied bundle; \EFone{} allocations always exist and can be computed in
+polynomial time, even for general monotone valuations
+\cite{LiptonEtAl2004}; see also \cite{Budish2011}. \EFX{} is the strictly stronger requirement
+that the envy disappears once \emph{any} single good is removed
+\cite{Caragiannis2019,PlautRoughgarden2020}. \EFX{} is one of the strongest such
+fairness notions for indivisible goods, and whether an \EFX{} allocation always
+exists is a major open problem in the area \cite{AmanatidisSurvey2023}.
+
+\paragraph{State of the art.}
+\EFX{} existence is known in only a handful of regimes. It holds for two agents
+with arbitrary monotone valuations \cite{PlautRoughgarden2020}, and for three
+agents with additive valuations \cite{ChaudhuryGargMehlhorn2024}. For four
+agents, Berger, Cohen, Feldman and Fiat \cite{BergerCohenFeldmanFiat2022} proved
+that an \EFX{} allocation always exists \emph{if at most one good is left
+unallocated} --- an ``almost full'' guarantee --- and, more generally, that with
+$\agents$ additive agents an \EFX{} allocation exists leaving at most
+$\agents-2$ goods unallocated. Whether a \emph{full} \EFX{} allocation (one that
+allocates \emph{all} goods) always exists for four agents is, to date, open even
+for additive valuations. On the negative side, Akrami, Mayorov, Mehlhorn,
+Srinivas and Weidenbach \cite{AkramiEtAl2026} very recently produced the first
+counterexamples to \EFX{} existence under \emph{submodular} (and hence monotone)
+valuations, showing that for $n\geq 3$ agents \EFX{} need not exist once
+$m \geq n+5$; they leave the \emph{additive} case wide open.
+
+Beyond exact existence, a large body of work studies what can be guaranteed when
+exactness is relaxed: approximate \EFX{} (where an agent's value for its own
+bundle is within a multiplicative factor of the envied bundle minus a good),
+\EFX{} with bounded charity (a small number of unallocated goods, as above),
+restricted valuation classes (binary, two-valued, or few distinct types), and
+\EFX{} on graphs where agents only compare with neighbours. The survey of
+Amanatidis et al.\ \cite{AmanatidisSurvey2023} gives a comprehensive map of these
+directions and frames exact \EFX{} existence for general additive valuations as
+a central open question.
+
+\paragraph{This report.}
+We approach full \EFX{} existence \emph{computationally}, for one fixed instance
+size. Concretely, we prove:
+
+\begin{theorem}[Main result]
+\label{thm:main}
+Every instance with four agents, eight goods and non-negative additive
+valuations admits a full \EFX{} allocation.
+\end{theorem}
+
+The proof is computational. The statement ``\EFX{} always exists for a fixed
+$(\agents,\goods)$'' has the form: \emph{for every} valuation profile \emph{there
+exists} an allocation that is \EFX. Its negation reads: \emph{there exists} a
+profile such that \emph{every} allocation fails \EFX. Because the valuations are
+real-valued and the \EFX{} conditions are linear inequalities, this negation is a
+single existential query in linear real arithmetic, which an SMT solver decides
+exactly: a satisfying assignment is a counterexample profile, while
+unsatisfiability means no counterexample exists, i.e.\ \EFX{} always exists.
+Running the query for $\agents=4,\ \goods=8$ returns \texttt{unsat}, which
+establishes Theorem~\ref{thm:main} for strictly positive valuations; a short
+reduction (Section~\ref{sec:nonneg}) then removes the positivity assumption,
+extending it to all non-negative profiles in the strong \EFX$_0$ sense.
+
+The remainder of the report sets up this reduction
+(Section~\ref{sec:reduction}), describes the Z3-based implementation and a
+goods-relabelling symmetry that we find empirically to be needed for the larger
+instances to finish (Section~\ref{sec:impl}), reports the result
+(Section~\ref{sec:results}), and places it against the literature
+(Section~\ref{sec:related}).
+
+\section{Preliminaries}
+\label{sec:prelim}
+
+\paragraph{Instances.}
+There are $\agents$ \emph{agents} $[\agents]=\{1,\dots,\agents\}$ and $\goods$
+indivisible \emph{goods} $[\goods]=\{1,\dots,\goods\}$. Each agent $i$ has an
+\emph{additive} valuation $\val{i}\colon 2^{[\goods]}\to\mathbb{R}_{\geq 0}$,
+meaning $\val{i}(S)=\sum_{g\in S}\val{i}(\{g\})$ for every bundle
+$S\subseteq[\goods]$. We write $w_{i,g}:=\val{i}(\{g\})$ for the value agent $i$
+assigns to good $g$, so a profile is an $\agents\times\goods$ matrix
+$(w_{i,g})$. Throughout we assume valuations are \emph{strictly positive},
+$w_{i,g}>0$; this is the standard ``goods'' setting and the one our solver
+encodes.
+
+\paragraph{Allocations.}
+An \emph{allocation} is an ordered partition $X=(X_1,\dots,X_\agents)$ of a
+subset of $[\goods]$ into pairwise-disjoint bundles, where $X_i$ is the bundle
+given to agent $i$. The allocation is \emph{full} (or \emph{complete}) if
+$\bigcup_i X_i = [\goods]$, i.e.\ no good is left over.
+
+\begin{definition}[Envy notions]
+\label{def:efx}
+Fix valuations $\val{1},\dots,\val{\agents}$ and an allocation $X$. In each clause
+below, $i$ and $j$ range over all ordered pairs of agents.
+\begin{itemize}
+  \item $X$ is \emph{envy-free} (\textsf{EF}) if
+        \[
+          \val{i}(X_i)\ \geq\ \val{i}(X_j).
+        \]
+  \item $X$ is \emph{envy-free up to one good} (\EFone) if
+        \[
+          \exists\, g\in X_j:\quad
+          \val{i}(X_i)\ \geq\ \val{i}(X_j\setminus\{g\})
+        \]
+        (and is defined to hold when $X_j=\emptyset$).
+  \item $X$ is \emph{envy-free up to any good} (\EFX) if
+        \[
+          \forall\, g\in X_j:\quad
+          \val{i}(X_i)\ \geq\ \val{i}\bigl(X_j\setminus\{g\}\bigr).
+        \]
+\end{itemize}
+The only difference between \EFone{} and \EFX{} is the quantifier on $g$ ($\exists$
+versus $\forall$): \EFone{} asks that \emph{some} good can be removed to eliminate
+the envy, \EFX{} that \emph{every} good does.
+\end{definition}
+
+Equivalently, $X$ is \EFX{} iff for every ordered pair $(i,j)$,
+\[
+  \val{i}(X_i)\ \geq\ \val{i}(X_j) - \min_{g\in X_j}\val{i}(\{g\}),
+\]
+because under additive (positive) valuations the bundle $X_j\setminus\{g\}$ of
+largest value to $i$ is the one obtained by removing $i$'s \emph{least}-valued
+good in $X_j$. When $X_j=\emptyset$ there is no good to remove and the condition
+holds trivially.
+
+\paragraph{A note on zero-valued goods.}
+Two variants of \EFX{} appear in the literature \cite{AmanatidisSurvey2023},
+differing in how they treat a good the envious agent values at zero. \EFX$_+$, as
+originally defined by Caragiannis et al.\ \cite{Caragiannis2019}, removes only
+\emph{positively}-valued goods ($g\in X_j$ with $\val{i}(\{g\})>0$); the stronger
+\EFX$_0$, used by Plaut and Roughgarden \cite{PlautRoughgarden2020}, removes
+\emph{any} good $g\in X_j$, including one valued at zero. We adopt the stronger
+\EFX$_0$ notion and state all of our results for it; the encoding of
+Section~\ref{sec:reduction} tests precisely this condition.
+
+The existence question we study is:
+
+\begin{quote}
+\emph{For fixed $\agents$ and $\goods$, does every additive profile admit a full
+\EFX{} allocation?}
+\end{quote}
+
+A \emph{counterexample} is a profile for which \emph{no} full \EFX{} allocation
+exists. Theorem~\ref{thm:main} asserts that for $(\agents,\goods)=(4,8)$ there is
+no counterexample.
+
+\section{Reducing existence to satisfiability}
+\label{sec:reduction}
+
+\subsection{Negating the existence statement}
+
+Fix $(\agents,\goods)$ and let $\mathcal{P}$ denote the (finite) set of ordered
+partitions of $[\goods]$ into $\agents$ non-empty bundles. The statement we want
+to prove is
+\[
+  \underbrace{\forall\, (w_{i,g})>0}_{\text{every profile}}\quad
+  \underbrace{\exists\, P\in\mathcal{P}}_{\text{some allocation}}\quad
+  \mathrm{EFX}(P,w),
+\]
+where $\mathrm{EFX}(P,w)$ is the predicate ``$P$ is \EFX{} under profile $w$''.
+There are infinitely many profiles, so the statement cannot be decided by checking
+them one by one. Its negation, however, is purely existential in
+$w$,
+\[
+  \exists\, (w_{i,g})>0\quad
+  \bigwedge_{P\in\mathcal{P}}\ \neg\,\mathrm{EFX}(P,w).
+\tag{$\star$}
+\label{eq:negation}
+\]
+That is: a counterexample is a single profile for which every allocation fails
+\EFX. Statement~\eqref{eq:negation} is a conjunction of disjunctions of
+\emph{linear} inequalities in the real variables $w_{i,g}$ --- the fragment
+\emph{linear real arithmetic} (LRA) that SMT solvers decide
+exactly.\footnote{Linearity also bounds the search a priori: if
+\eqref{eq:negation} is satisfiable then it has a \emph{rational} solution, because
+a feasible system of linear inequalities with rational coefficients has a rational
+point (the feasible region of the strict system is open and non-empty, hence
+contains a rational point). A counterexample profile, if one exists, may therefore
+be taken rational, matching the exact rational arithmetic the solver uses
+(Section~\ref{sec:lra}).} Feeding \eqref{eq:negation} to such a solver yields:
+\begin{itemize}
+  \item \texttt{sat} $\Rightarrow$ a counterexample profile, which can be read off
+        as a rational matrix; or
+  \item \texttt{unsat} $\Rightarrow$ \eqref{eq:negation} has no solution, hence the
+        original statement holds: \EFX{} always exists.
+\end{itemize}
+
+\subsection{Deciding the query: linear real arithmetic}
+\label{sec:lra}
+
+Why can a solver decide \eqref{eq:negation} \emph{exactly}, rather than only
+search heuristically? The formula \eqref{eq:negation} lives in \emph{quantifier-free
+linear real arithmetic} (QF-LRA): a Boolean combination of linear inequalities
+$\sum_g a_g\,w_{i,g}\bowtie c$ with rational coefficients, where
+$\bowtie\,\in\{<,\leq,=,\geq,>\}$. This theory is \emph{decidable}: a
+\textbf{conjunction} of linear inequalities (an intersection of half-spaces) over
+the reals is satisfiable iff the corresponding polyhedron is non-empty, which a
+simplex-style procedure settles in finitely many exact-rational pivots; an SMT
+solver lifts this to arbitrary Boolean structure by searching over truth
+assignments to the inequalities in a SAT-solving loop (the DPLL($T$) procedure
+underlying SMT). All arithmetic is carried out over the rationals $\mathbb{Q}$,
+with no floating-point approximation and no $\varepsilon$-tolerances, so an
+\texttt{unsat} verdict is a true impossibility rather than a numerical
+artefact --- provided the solver reasons exactly. Z3's QF-LRA core is designed to do so, using
+exact arbitrary-precision rational arithmetic. This exactness is what lets us treat valuations as
+arbitrary positive reals: proving \texttt{unsat} over $\mathbb{R}$ rules out
+\emph{all} real --- in particular all rational and all integer --- profiles at
+once.
+
+\subsection{Encoding a single allocation: the \texttt{nonenvy} predicate}
+
+For a fixed partition $P=(P_1,\dots,P_\agents)$, the predicate
+$\mathrm{EFX}(P,w)$ expands into one inequality per (envious agent, envied agent,
+removed good) triple. For agent $i$ looking at agent $j$'s bundle $P_j$, and for
+each good $k\in P_j$, \EFX{} demands
+\begin{equation}
+  \sum_{g\in P_i} w_{i,g}\ \geq\ \sum_{g\in P_j} w_{i,g} - w_{i,k}.
+  \label{eq:efxconstraint}
+\end{equation}
+$\mathrm{EFX}(P,w)$ is exactly the conjunction of \eqref{eq:efxconstraint} over all
+$i\neq j$ and all $k\in P_j$. Two simplifications are sound and are used in the
+implementation:
+\begin{itemize}
+  \item \textbf{An envied bundle that is a singleton imposes no constraint}: if
+        $|P_j|\leq 1$, the terms from $j$ may be dropped
+        (Observation~\ref{obs:singleton}).
+  \item \textbf{Own bundle is excluded} ($i=j$ is skipped), since an agent never
+        envies itself.
+\end{itemize}
+
+\begin{observation}[Singletons impose no \EFX{} constraint]
+\label{obs:singleton}
+Under non-negative valuations, if $|P_j|\leq 1$ then no agent $i\neq j$ can
+\EFX-envy $j$, so the corresponding constraints \eqref{eq:efxconstraint} always
+hold and can be dropped.
+\end{observation}
+
+\begin{proof}
+If $P_j=\emptyset$ there is no good $k$ to quantify over and the predicate is
+empty. If $P_j=\{k\}$, the only instance of \eqref{eq:efxconstraint} reads
+$\sum_{g\in P_i}w_{i,g}\geq w_{i,k}-w_{i,k}=0$, which holds because all
+valuations are non-negative. In both cases the singleton adds no real constraint.
+\end{proof}
+
+\paragraph{Example expansion.}
+In general a partition contributes one inequality for every ordered pair $(i,j)$
+with $|P_j|\geq 2$ and every good $k\in P_j$. For $\agents=2$, $\goods=3$ and the
+partition $P=(\{1\},\{2,3\})$ only the pair $(1,2)$ qualifies --- agent~$2$ faces
+the singleton $P_1=\{1\}$, which contributes nothing by
+Observation~\ref{obs:singleton} --- so the block is small:
+\[
+  \underbrace{w_{1,1}\ \geq\ (w_{1,2}+w_{1,3})-w_{1,2}}_{\text{remove good }2}
+  \quad\wedge\quad
+  \underbrace{w_{1,1}\ \geq\ (w_{1,2}+w_{1,3})-w_{1,3}}_{\text{remove good }3},
+\]
+i.e.\ $w_{1,1}\geq w_{1,3}$ and $w_{1,1}\geq w_{1,2}$. Each partition yields such a
+block, and the solver asserts the negation of their disjunction: that no
+partition's block holds in full.
+
+\subsection{Why restricting to non-empty partitions is conservative}
+\label{sec:conservative}
+
+The set $\mathcal{P}$ ranges only over partitions in which \emph{every} agent
+receives at least one good. \EFX{} allocations are not required to be of this
+form, so $\mathcal{P}$ omits some valid candidate allocations (those that hand
+an agent the empty bundle). It is important to see that this restriction is
+\emph{safe for the existence direction} we care about.
+
+\begin{proposition}[Soundness of the restricted search]
+\label{prop:conservative}
+Let $\mathcal{P}'\subseteq\mathcal{P}^{\mathrm{all}}$ be any subset of the full
+set of allocations. If the query
+$\exists w>0:\ \bigwedge_{P\in\mathcal{P}'}\neg\mathrm{EFX}(P,w)$ is
+unsatisfiable (has no solution $w$, i.e.\ no counterexample), then \EFX{} always
+exists (even when ranging over $\mathcal{P}^{\mathrm{all}}$).
+\end{proposition}
+
+\begin{proof}
+Removing allocations from the conjunction in \eqref{eq:negation} can only
+\emph{weaken} it: $\bigwedge_{P\in\mathcal{P}^{\mathrm{all}}}\neg\mathrm{EFX}
+\implies \bigwedge_{P\in\mathcal{P}'}\neg\mathrm{EFX}$. Contrapositively, if the
+smaller conjunction over $\mathcal{P}'$ is unsatisfiable, so is the larger one
+over $\mathcal{P}^{\mathrm{all}}$; hence no counterexample profile exists and
+\EFX{} always exists.
+\end{proof}
+
+Restricting the candidate set can therefore only introduce false counterexamples,
+never false claims of existence; an \texttt{unsat} on the restricted set
+$\mathcal{P}$ still proves existence. This is what our run establishes for
+$(\agents,\goods)=(4,8)$.\footnote{In any case, for positive additive valuations
+with $\goods\geq\agents$ an allocation that leaves an agent empty is never \EFX{}
+unless every other bundle is a singleton, so the restriction discards little here;
+Proposition~\ref{prop:conservative} makes the argument independent of this.}
+
+\subsection{Symmetry reduction}
+\label{sec:symmetry}
+
+Relabelling the goods is a symmetry of the problem: permuting the columns of a
+profile $w$ and applying the same permutation to every bundle preserves \EFX. We
+break this symmetry by fixing one agent's view. Without loss of generality the
+goods are indexed so that agent $1$'s valuations are non-decreasing,
+\[
+  w_{1,1}\ \leq\ w_{1,2}\ \leq\ \cdots\ \leq\ w_{1,\goods}.
+\]
+This is encoded as $\goods-1$ extra inequalities. It is sound because every
+profile is equivalent, after relabelling goods, to one in sorted form, and it
+removes a factor of up to $\goods!$ from the search space (for $\goods=8$, up to
+$40320$). The realised speedup can be smaller than $\goods!$, since Z3 already
+performs some symmetry reduction internally; Section~\ref{sec:bench} measures the
+actual effect.
+
+\subsection{Counting the candidate allocations}
+
+The number of ordered partitions of $\goods$ goods into $\agents$ non-empty
+labelled bundles is the surjection count
+$\agents!\,\genfrac{\{}{\}}{0pt}{}{\goods}{\agents}$, where
+$\genfrac{\{}{\}}{0pt}{}{\goods}{\agents}$ is a Stirling number of the second
+kind. For the three sizes we ran ($\agents=4$, $\goods\in\{6,7,8\}$):
+\[
+  4!\cdot\genfrac{\{}{\}}{0pt}{}{6}{4}=1560,\qquad
+  4!\cdot\genfrac{\{}{\}}{0pt}{}{7}{4}=8400,\qquad
+  4!\cdot\genfrac{\{}{\}}{0pt}{}{8}{4}=40824.
+\]
+Each of these $40824$ partitions contributes its block of inequalities
+\eqref{eq:efxconstraint}; the solver must refute the conjunction of all their
+negations simultaneously.
+
+\subsection{The shape of the search space}
+\label{sec:searchspace}
+
+We now explain why the problem is hard, which accounts for both the runtime and
+the limits of the approach. The formula \eqref{eq:negation}
+has only $32$ real variables, but a large Boolean structure: a counterexample
+profile must violate at least one \EFX{} inequality of each of the $40824$
+allocations at once. The solver does not go through profiles or
+combinations one by one. Instead it uses the linear structure to prune: once a
+partial set of constraints has no solution, every larger set that contains it has
+no solution either, so the solver can skip them all.
+
+Two consequences follow. First, the difficulty is highly sensitive to $\goods$:
+going from $\goods=6$ to $\goods=8$ multiplies the allocation count by about $26$
+and lengthens every constraint, and the running time grows from under a second to
+about $62$ hours (Section~\ref{sec:results}). Second, this sensitivity also means
+the $(4,8)$ run is computationally demanding: the related three-agent /
+seven-good \EFX{} query did not terminate within a $40$-hour budget for the same
+Z3-over-LRA approach \cite{AkramiEtAl2026}, so termination at this scale cannot be
+taken for granted.
+
+\section{Implementation}
+\label{sec:impl}
+
+\subsection{Z3 pipeline}
+
+The main prover is a C++ program built against the Z3 C++ API
+\cite{deMouraBjorner2008}. It (i) creates the $\agents\times\goods$ real
+variables $w_{i,g}$ and asserts positivity and the sortedness constraints of
+Section~\ref{sec:symmetry}; (ii) enumerates the non-empty ordered partitions;
+(iii) builds, for each partition, the conjunction \texttt{nonenvy} of
+constraints \eqref{eq:efxconstraint}; (iv) asserts the negation of their
+disjunction; and (v) calls the solver. The core of the encoding is shown below.
+
+\begin{lstlisting}[language=C++,caption={The \texttt{nonenvy} predicate
+(constraints \eqref{eq:efxconstraint}), from \texttt{main.cpp}.},label={lst:nonenvy}]
+z3::expr nonenvy(z3::context &ctx,
+                 const std::vector<std::vector<int>> &partition,
+                 const std::vector<std::vector<z3::expr>> &w) {
+  z3::expr_vector constraints(ctx);
+  for (int i = 0; i < N; ++i) {
+    z3::expr total = ctx.real_val(0);          // value of i's own bundle
+    for (int j : partition[i]) total = total + w[i][j];
+
+    for (int j = 0; j < N; ++j) {
+      if (i == j) continue;
+      if (partition[j].size() <= 1) continue;  // singletons: EFX is automatic
+      z3::expr other = ctx.real_val(0);        // value of j's bundle to i
+      for (int k : partition[j]) other = other + w[i][k];
+      // For every k in j's bundle: i must not envy j after removing k.
+      for (int k : partition[j])
+        constraints.push_back(total >= other - w[i][k]);
+    }
+  }
+  return z3::mk_and(constraints);
+}
+\end{lstlisting}
+
+\begin{lstlisting}[language=C++,caption={Assembling and refuting the global
+disjunction, from \texttt{main.cpp}.},label={lst:assemble}]
+// First agent's valuations sorted (goods-relabelling symmetry break).
+for (int j = 0; j < M - 1; ++j) solver.add(w[0][j] <= w[0][j + 1]);
+
+auto partitions = ordered_groups(N, M);           // 40824 for (4,8)
+z3::expr_vector valid_exprs(ctx);
+for (const auto &part : partitions)
+  valid_exprs.push_back(nonenvy(ctx, part, w));
+z3::expr or_valid = z3::mk_or(valid_exprs);
+solver.add(!or_valid);                             // assert (*) : no allocation is EFX
+
+z3::check_result result = solver.check();          // unsat  =>  EFX always exists
+\end{lstlisting}
+
+The program also exports the assembled query in the standard SMT-LIB~2 format so
+that it can be replayed by any compliant solver; for $(\agents,\goods)=(4,8)$
+this script (\texttt{problem\_4\_8.smt2}) is about $9$\,MiB, compared with
+$0.24$\,MiB for $(4,6)$. Its structure is a flat declaration of the $32$ real
+variables, the positivity and sortedness assertions, and one large negated
+disjunction:
+
+\begin{lstlisting}[caption={Shape of the exported SMT-LIB~2 query (abridged).},label={lst:smtlib}]
+(declare-fun w_0_0 () Real)  ... (declare-fun w_3_7 () Real)
+(assert (> w_0_0 0)) ...                      ; positivity, 32 of these
+(assert (<= w_0_0 w_0_1)) ...                 ; agent 0 sorted, 7 of these
+(assert (not (or
+   (and (>= ...) (>= ...) ...)                ; nonenvy(partition 1)
+   ...
+   (and (>= ...) (>= ...) ...))))             ; nonenvy(partition 40824)
+(check-sat)
+\end{lstlisting}
+
+\subsection{The relabelling symmetry break, measured}
+\label{sec:bench}
+
+Section~\ref{sec:symmetry} argued that fixing agent~$1$'s valuations in
+non-decreasing order removes a factor of up to $\goods!$ from the search. To
+measure its effect we ran the prover at $\agents=4$ for $\goods\in\{6,7\}$ both
+with and without the three optimizations, leaving everything else identical;
+Table~\ref{tab:bench} reports the wall-clock.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{rrrr}
+\toprule
+$\goods$ & \#partitions & with relabelling & without relabelling\\
+\midrule
+$6$ & $1{,}560$ & $<1$\,s & $8$\,s\\
+$7$ & $8{,}400$ & $196$\,s ($\approx 3.3$\,min) & $>30$\,min (did not finish)\\
+\bottomrule
+\end{tabular}
+\caption{Effect of the agent-$1$ relabelling symmetry break ($\agents=4$).
+Disabling it leaves the $\goods!$ permutation copies of every profile in the
+search, and the solver must rediscover the same refutation for each.}
+\label{tab:bench}
+\end{table}
+
+The symmetry break helps, and more so as $\goods$ grows. At $\goods=7$ the
+unsorted run did not finish within a $30$-minute cap while the sorted run took
+about $3$ minutes --- at least a tenfold reduction, and only a lower bound since
+the unsorted run did not terminate. We did not run the unsorted $\goods=8$ case.
+
+\section{Results}
+\label{sec:results}
+
+For $(\agents,\goods)=(4,8)$ the solver returned \texttt{unsat}
+(``\texttt{No counterexample}''), establishing Theorem~\ref{thm:main} for strictly
+positive valuations; Section~\ref{sec:nonneg} lifts it to all non-negative
+profiles. The
+smaller instances $(4,6)$ and $(4,7)$ were solved first and likewise admit a full
+\EFX{} allocation for every profile. Table~\ref{tab:results} summarises the runs.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{lrrl}
+\toprule
+Instance $(\agents,\goods)$ & \#partitions & Wall-clock & Outcome\\
+\midrule
+$(4,6)$ & $1{,}560$  & $<1$\,s        & \texttt{unsat} (full \EFX{} exists)\\
+$(4,7)$ & $8{,}400$  & $196$\,s       & \texttt{unsat} (full \EFX{} exists)\\
+$(4,8)$ & $40{,}824$ & $62$\,h\,$34$\,m & \texttt{unsat} (full \EFX{} exists)\\
+\bottomrule
+\end{tabular}
+\caption{Outcomes of the SMT runs; peak memory for the $(4,8)$ run was about
+$415$\,MB.}
+\label{tab:results}
+\end{table}
+
+\begin{observation}
+For this instance size, Theorem~\ref{thm:main} is stronger than the ``almost
+full'' guarantee of \cite{BergerCohenFeldmanFiat2022}: it shows that the single
+item that their result may leave unallocated is never needed at $(4,8)$ --- a
+complete allocation always exists.
+\end{observation}
+
+\section{Extension to non-negative valuations}
+\label{sec:nonneg}
+
+The solver assumes strictly positive valuations, but the result extends to all
+\emph{non-negative} additive profiles, including those with zero entries, and the
+argument stays within the additive class.
+
+\begin{theorem}
+\label{thm:nonneg}
+Fix $\agents,\goods$. If every strictly positive additive profile admits a full
+\EFX{} allocation over the ordered partitions, then every
+non-negative additive profile admits a full \EFX$_0$ allocation over the same
+family.
+\end{theorem}
+
+\begin{proof}
+The argument perturbs the zero entries to obtain a strictly positive profile,
+applies the hypothesis to get a full \EFX{} allocation there (on a strictly
+positive profile no good is valued at zero, so this allocation is already
+\EFX$_0$), and shows the same allocation stays \EFX$_0$ for the original profile.
+
+Each agent's \EFX$_0$ constraints involve only that agent's own weights, so we
+argue one agent $i$ at a time, with weights $w_{i,\cdot}\ge 0$. If all of agent
+$i$'s weights are zero, every \EFX$_0$ constraint for $i$ reads $0\ge 0$ and holds;
+otherwise $i$ has a positive weight. Let
+$W_i=\{\sum_{g\in S}w_{i,g}:S\subseteq[\goods]\}$ be the bundle values $i$ can
+attain and set
+\[
+  d_i=\min\{|x-y|:x,y\in W_i,\ x\neq y\}>0,\qquad
+  \varepsilon_i=\frac{d_i}{2\goods}.
+\]
+(Since $i$ has a positive weight, $W_i$ is a finite set with at least two distinct
+elements --- for instance $0$ and $\max_g w_{i,g}>0$ --- so the minimum defining
+$d_i$ ranges over a finite, non-empty set of positive gaps and is itself positive.) For each good with $w_{i,g}>0$ the values $0$
+and $w_{i,g}$ lie in $W_i$, hence $d_i\le w_{i,g}$ and so
+$\varepsilon_i<d_i\le w_{i,g}$: $\varepsilon_i$ is below every positive weight of
+$i$.
+
+Let $\hat w$ replace each zero entry $w_{i,g}=0$ by $\varepsilon_i$ and keep
+positive entries. Then $\hat w$ is strictly positive, so by hypothesis it admits a
+full \EFX{} allocation $X$; we show the same $X$ is
+\EFX$_0$ for $w$. Consider a pair $(i,j)$ with $i\neq j$ and let
+$g^\star=\arg\min_{g\in X_j}w_{i,g}$; it suffices to check
+$v_i(X_i)\ge v_i(X_j\setminus\{g^\star\})$ under $w$. As $\varepsilon_i$ is below
+every positive weight, $g^\star$ also minimises $\hat w_{i,\cdot}$ over $X_j$: if
+$X_j$ holds a good $i$ values at $0$ that good minimises under both $w$ and
+$\hat w$, and otherwise the smallest positive good does. Write $L=v_i(X_i)$,
+$R=v_i(X_j\setminus\{g^\star\})$ (values under $w$) and let $a,b$ count the
+goods that $i$ values at $0$ in $X_i$ and in $X_j\setminus\{g^\star\}$. The \EFX{} inequality for
+$\hat w$ at $g^\star$ is $L+a\varepsilon_i\ge R+b\varepsilon_i$, i.e.
+$(a-b)\varepsilon_i\ge R-L$. If \EFX$_0$ under $w$ failed then $L<R$, so $R-L>0$
+with $L,R\in W_i$ distinct and hence $R-L\ge d_i$; but $a-b\le a\le\goods$ gives
+$(a-b)\varepsilon_i\le\goods\,\varepsilon_i=d_i/2<d_i$, a contradiction. Thus
+$L\ge R$, the pair satisfies \EFX$_0$ under $w$, and $X$ is \EFX$_0$ for $w$.
+\end{proof}
+
+\begin{corollary}
+\label{cor:nonneg}
+For each $(\agents,\goods)\in\{(4,6),(4,7),(4,8)\}$, every non-negative additive
+profile admits a full \EFX$_0$ allocation in which every agent receives at least
+one good.
+\end{corollary}
+
+\section{Related work and novelty}
+\label{sec:related}
+
+Two lines of work are especially close.
+
+\paragraph{Berger, Cohen, Feldman and Fiat \cite{BergerCohenFeldmanFiat2022}.}
+They proved that four additive agents always admit an \EFX{} allocation
+\emph{leaving at most one good unallocated}, and more generally that $\agents$
+additive agents admit one leaving at most $\agents-2$ goods unallocated. This is
+a theorem for \emph{all} $\goods$, but it is an ``almost full'' guarantee:
+whether a \emph{complete} four-agent \EFX{} allocation always exists is left
+open. Our result removes the leftover item for the specific size $\goods=8$.
+
+\paragraph{Akrami, Mayorov, Mehlhorn, Srinivas and Weidenbach \cite{AkramiEtAl2026}.}
+This recent work uses the same reduction idea --- encode the negation of \EFX{}
+existence and let \texttt{sat}/\texttt{unsat} decide --- but in a different
+parameter regime. Their computations are for \emph{three} agents
+($\goods\in\{6,7,8\}$) under \emph{monotone} valuations: they certify existence
+for three agents and seven goods, and find by SAT a submodular (hence monotone)
+counterexample for three agents and eight goods; the counterexample for general
+$n\geq 3,\ m\geq n+5$ is then obtained from this seed by an explicit construction
+rather than by solving. Their Z3 SMT-over-LRA encoding did not terminate within
+$40$ hours for three agents and seven goods (three agents and six goods took about
+$26$ seconds). They explicitly leave the \emph{additive} case open, and their
+computational results do not reach four agents.
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{p{3.1cm}cccp{2.3cm}p{2.4cm}}
+\toprule
+Work & Agents & Goods & Valuations & Guarantee & Method\\
+\midrule
+Plaut--Roughgarden \cite{PlautRoughgarden2020}
+  & $2$ & any & monotone & full \EFX{} exists & proof\\
+Chaudhury et al. \cite{ChaudhuryGargMehlhorn2024}
+  & $3$ & any & additive & full \EFX{} exists & proof\\
+Berger et al. \cite{BergerCohenFeldmanFiat2022}
+  & $4$ & any & additive & \emph{almost} full ($\leq 1$ leftover) & proof\\
+Akrami et al. \cite{AkramiEtAl2026}
+  & $3$ & $7$ & monotone & full \EFX{} exists & SAT\\
+Akrami et al. \cite{AkramiEtAl2026}
+  & $\geq3$ & $\geq n{+}5$ & monotone & \emph{counterexample} & SAT\,+\,constr.\\
+\textbf{This report}
+  & $\mathbf{4}$ & $\mathbf{8}$ & \textbf{additive} & \textbf{full \EFX{} exists}
+  & \textbf{SMT (LRA)}\\
+\bottomrule
+\end{tabular}
+\caption{The four-agent / eight-good additive cell is, to our knowledge,
+established here for the first time.}
+\label{tab:related}
+\end{table}
+
+\paragraph{Novelty.}
+Table~\ref{tab:related} summarises these results. To the best of our knowledge,
+full \EFX{} existence for four agents and eight goods under additive valuations
+has not been established before, by any method. The two works above are related
+but address different questions: Berger et al.\ \cite{BergerCohenFeldmanFiat2022}
+give an analytic ``almost full'' guarantee for all sizes but not a complete
+allocation, while Akrami et al.\ \cite{AkramiEtAl2026} compute with monotone
+valuations for three agents and leave the additive case open. The present result
+concerns additive valuations, four agents, and a complete allocation, at the
+fixed size $\goods=8$.
+
+Our $(4,8)$ instance sits exactly one good \emph{below} the submodular
+counterexample threshold $\goods=\agents+5=9$ of \cite{AkramiEtAl2026}: at
+$(4,9)$ a submodular (hence monotone) profile with no \EFX{} allocation provably
+exists, whereas the additive case there is open. The natural next case is thus
+$(4,9)$: an additive \EFX{} result there would show that additivity, not just
+monotonicity, is what makes \EFX{} attainable at this size. We return to it in
+Section~\ref{sec:conclusion}.
+
+\section{Discussion and limitations}
+\label{sec:discussion}
+
+\paragraph{No machine-checked certificate.}
+The $(4,8)$ result rests on Z3 returning \texttt{unsat}, not on an externally
+replayable proof object. We attempted to extract one, but enabling Z3's proof
+generation did not yield a usable proof: the solver returned \texttt{unknown}
+under the proof-producing configuration, so no DRAT- or Lean-checkable certificate
+is available. By contrast, Akrami et al.\ \cite{AkramiEtAl2026} verified their SAT
+encoding in Lean and their unsatisfiability proofs with \textsc{drat-trim}.
+Obtaining a checkable certificate for the $(4,8)$ query would require a different,
+proof-producing pipeline (for instance an exact-arithmetic LP/Farkas back-end),
+and remains open.
+
+\paragraph{What underpins the trust in the result.}
+Two things support Theorem~\ref{thm:main}. (i) The reduction itself is
+elementary and is argued in full in Section~\ref{sec:reduction}, with the one
+non-obvious step --- restricting to non-empty partitions --- proved sound in
+Proposition~\ref{prop:conservative}; the exactness of LRA reasoning
+(Section~\ref{sec:lra}) means the \texttt{unsat} verdict is an exact
+impossibility over the reals, not a numerical artefact. (ii) The decision is
+reproducible: the query is exported as a standalone SMT-LIB~2 script and can be
+replayed by any LRA-capable solver, so the result does not depend on our
+particular driver code.
+
+\paragraph{Scope of the claim.}
+Theorem~\ref{thm:main} covers all
+\emph{non-negative additive} valuations at the \emph{fixed} size $\goods=8$. It
+says nothing about non-additive valuations, about chores (negative valuations), or
+about $\goods=9$ or larger --- each size is a separate, much larger computation we
+have not run, and existence at one size does not imply it at the next. The
+$\mathcal{P}$-restriction to non-empty bundles
+is sound for the existence direction by Proposition~\ref{prop:conservative}, but
+means the same code, used to \emph{find} a counterexample, would have to be
+extended to allow empty bundles before a \texttt{sat} answer could be trusted as
+a valid counterexample.
+
+\paragraph{Scaling.}
+The jump from $1{,}560$ to $40{,}824$ partitions ($6\to 8$ goods) took the
+runtime from seconds to $62.5$ hours. Each added good both multiplies the
+partition count and widens every constraint, so $\goods=9$ is well out of reach
+of the present encoding without substantially stronger symmetry breaking or a
+fundamentally different decomposition.
+
+\section{Conclusion and future work}
+\label{sec:conclusion}
+
+We reduced the existence of full \EFX{} allocations, for a fixed instance size,
+to a single satisfiability query over linear real arithmetic, and used it to show
+by computer that every additive profile with four agents and eight goods admits a
+full \EFX{} allocation (Theorem~\ref{thm:main}). To our knowledge this is the
+first verification for the four-agent / eight-good additive case; it strengthens
+the ``almost full'' four-agent guarantee of \cite{BergerCohenFeldmanFiat2022} at
+this size and complements the recent SAT-based work of \cite{AkramiEtAl2026},
+which addressed three agents and left additive valuations open.
+
+Several directions follow naturally:
+\begin{itemize}
+  \item \textbf{A checkable certificate.} Our attempt to obtain a replayable proof
+        failed --- Z3 returned \texttt{unknown} under proof generation
+        (Section~\ref{sec:discussion}). A proof-producing pipeline, for instance an
+        exact LP/Farkas back-end emitting a certificate per allocation, would
+        remove the reliance on trusting the solver.
+  \item \textbf{The separating case $\goods=9$.} For $\agents=4$ the smallest
+        submodular (hence monotone) \EFX{} counterexample \emph{guaranteed} by
+        \cite{AkramiEtAl2026} occurs at $\goods=\agents+5=9$: a submodular profile
+        with four agents and \emph{nine} goods provably admits \emph{no} \EFX{}
+        allocation.
+        Settling the \emph{additive} case at $(4,9)$ is therefore the natural next
+        target, and it is informative either way. If the solver
+        returns \texttt{unsat}, then additive \EFX{} exists where monotone \EFX{}
+        fails --- a \emph{separation} showing that \EFX{} existence depends on
+        additivity, in the positive direction of the open question raised by
+        \cite{AkramiEtAl2026}. If instead it returns \texttt{sat}, the
+        witness is an additive instance with no \EFX{} allocation --- a refutation
+        of \EFX{} existence for additive valuations, i.e.\ a resolution of the
+        main open problem for additive valuations. The obstacle is scale: $(4,9)$ has
+        $4!\,\genfrac{\{}{\}}{0pt}{}{9}{4}=186{,}480$ ordered partitions
+        ($\approx 4.6\times$ the $40{,}824$ of $(4,8)$), an extra variable per
+        agent, and longer constraints, so it will require parallelising or sharding
+        the partition set and symmetry breaking stronger than sorting a single
+        agent.
+  \item \textbf{Variants.} Adapt the encoding to related notions: \EFX{} for
+        chores (negative valuations), or the relaxations (tEFX, and \EFone{}
+        together with EEFX) that \cite{AkramiEtAl2026} study for three agents.
+\end{itemize}
+
+\printbibliography[heading=bibintoc,title={References}]
+
+\end{document}
