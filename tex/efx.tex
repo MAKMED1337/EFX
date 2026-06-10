@@ -218,15 +218,17 @@ largest value to $i$ is the one obtained by removing $i$'s \emph{least}-valued
 good in $X_j$. When $X_j=\emptyset$ there is no good to remove and the condition
 holds trivially.
 
-\paragraph{A note on zero-valued goods.}
+\paragraph{A note on the literature.}
 Two variants of \EFX{} appear in the literature \cite{AmanatidisSurvey2023},
 differing in how they treat a good the envious agent values at zero. \EFX$_+$, as
 originally defined by Caragiannis et al.\ \cite{Caragiannis2019}, removes only
 \emph{positively}-valued goods ($g\in X_j$ with $\val{i}(\{g\})>0$); the stronger
 \EFX$_0$, used by Plaut and Roughgarden \cite{PlautRoughgarden2020}, removes
-\emph{any} good $g\in X_j$, including one valued at zero. We adopt the stronger
-\EFX$_0$ notion and state all of our results for it; the encoding of
-Section~\ref{sec:reduction} tests precisely this condition.
+\emph{any} good $g\in X_j$, including one valued at zero. The corresponding
+existence guarantees are equivalent at any fixed instance size
+(Corollary~\ref{cor:equiv}), so the choice between them does not affect our
+results. We adopt the stronger \EFX$_0$ notion and state all of our results for
+it; the encoding of Section~\ref{sec:reduction} tests precisely this condition.
 
 The existence question we study is:
 
@@ -636,6 +638,31 @@ For each $(\agents,\goods)\in\{(4,6),(4,7),(4,8)\}$, every non-negative additive
 profile admits a full \EFX$_0$ allocation in which every agent receives at least
 one good.
 \end{corollary}
+
+\begin{corollary}[The three guarantees coincide]
+\label{cor:equiv}
+Fix $\agents,\goods$ and consider full allocations over the ordered partitions of
+$[\goods]$ into $\agents$ non-empty bundles. The following are equivalent:
+\begin{enumerate}
+  \item[\textnormal{(P)}] every strictly positive additive profile admits a full
+        \EFX{} allocation;
+  \item[\textnormal{(Q)}] every non-negative additive profile admits a full
+        \EFX$_0$ allocation;
+  \item[\textnormal{(R)}] every non-negative additive profile admits a full
+        \EFX$_+$ allocation.
+\end{enumerate}
+\end{corollary}
+
+\begin{proof}
+(P)$\Rightarrow$(Q) is Theorem~\ref{thm:nonneg}. (Q)$\Rightarrow$(R) is immediate:
+on any profile the \EFX$_+$ constraints (removing only positively-valued goods) form a
+subset of the \EFX$_0$ constraints (removing any good), so every \EFX$_0$ allocation is
+\EFX$_+$ and a full \EFX$_0$ allocation is in particular a full \EFX$_+$ one. For
+(R)$\Rightarrow$(P), let $w>0$ be strictly positive. It is non-negative, so by (R) it
+admits a full \EFX$_+$ allocation $X$ over the ordered partitions; since every entry of
+$w$ is positive, no good is valued at zero, so on $w$ the \EFX$_+$, \EFX$_0$ and plain
+\EFX{} conditions coincide. Hence $X$ is a full \EFX{} allocation and (P) holds.
+\end{proof}
 
 \section{Related work and novelty}
 \label{sec:related}

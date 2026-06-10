@@ -1,15 +1,15 @@
 [0] Config.pm:308> INFO - This is Biber 2.20
 [0] Config.pm:311> INFO - Logfile is 'efx.blg'
-[57] biber:340> INFO - === вт чер  9, 2026, 22:26:42
-[69] Biber.pm:420> INFO - Reading 'efx.bcf'
+[57] biber:340> INFO - === ср чер 10, 2026, 13:15:45
+[68] Biber.pm:420> INFO - Reading 'efx.bcf'
 [117] Biber.pm:994> INFO - Found 9 citekeys in bib section 0
-[125] Biber.pm:4463> INFO - Processing section 0
+[126] Biber.pm:4463> INFO - Processing section 0
 [133] Biber.pm:4654> INFO - Looking for bibtex file 'efx.bib' for section 0
-[133] bibtex.pm:1713> INFO - LaTeX decoding ...
-[140] bibtex.pm:1519> INFO - Found BibTeX data source 'efx.bib'
-[221] UCollate.pm:68> INFO - Overriding locale 'en-US' defaults 'variable = shifted' with 'variable = non-ignorable'
-[221] UCollate.pm:68> INFO - Overriding locale 'en-US' defaults 'normalization = NFD' with 'normalization = prenormalized'
-[221] Biber.pm:4283> INFO - Sorting list 'nyt/global//global/global/global' of type 'entry' with template 'nyt' and locale 'en-US'
-[221] Biber.pm:4289> INFO - No sort tailoring available for locale 'en-US'
-[229] bbl.pm:676> INFO - Writing 'efx.bbl' with encoding 'UTF-8'
-[232] bbl.pm:779> INFO - Output to efx.bbl
+[134] bibtex.pm:1713> INFO - LaTeX decoding ...
+[141] bibtex.pm:1519> INFO - Found BibTeX data source 'efx.bib'
+[223] UCollate.pm:68> INFO - Overriding locale 'en-US' defaults 'normalization = NFD' with 'normalization = prenormalized'
+[223] UCollate.pm:68> INFO - Overriding locale 'en-US' defaults 'variable = shifted' with 'variable = non-ignorable'
+[223] Biber.pm:4283> INFO - Sorting list 'nyt/global//global/global/global' of type 'entry' with template 'nyt' and locale 'en-US'
+[223] Biber.pm:4289> INFO - No sort tailoring available for locale 'en-US'
+[231] bbl.pm:676> INFO - Writing 'efx.bbl' with encoding 'UTF-8'
+[234] bbl.pm:779> INFO - Output to efx.bbl

@@ -4,7 +4,7 @@
 \contentsline {section}{\numberline {2}Preliminaries}{3}{section.2}%
 \contentsline {paragraph}{Instances.}{3}{section*.4}%
 \contentsline {paragraph}{Allocations.}{3}{section*.5}%
-\contentsline {paragraph}{A note on zero-valued goods.}{3}{section*.6}%
+\contentsline {paragraph}{A note on the literature.}{3}{section*.6}%
 \contentsline {section}{\numberline {3}Reducing existence to satisfiability}{4}{section.3}%
 \contentsline {subsection}{\numberline {3.1}Negating the existence statement}{4}{subsection.3.1}%
 \contentsline {subsection}{\numberline {3.2}Deciding the query: linear real arithmetic}{4}{subsection.3.2}%
@@ -22,11 +22,11 @@
 \contentsline {section}{\numberline {7}Related work and novelty}{9}{section.7}%
 \contentsline {paragraph}{Berger, Cohen, Feldman and Fiat \blx@tocontentsinit {0}\cite {BergerCohenFeldmanFiat2022}.}{9}{section*.9}%
 \contentsline {paragraph}{Akrami, Mayorov, Mehlhorn, Srinivas and Weidenbach \blx@tocontentsinit {0}\cite {AkramiEtAl2026}.}{9}{section*.10}%
-\contentsline {paragraph}{Novelty.}{9}{section*.11}%
+\contentsline {paragraph}{Novelty.}{10}{section*.11}%
 \contentsline {section}{\numberline {8}Discussion and limitations}{10}{section.8}%
 \contentsline {paragraph}{No machine-checked certificate.}{10}{section*.12}%
 \contentsline {paragraph}{What underpins the trust in the result.}{10}{section*.13}%
 \contentsline {paragraph}{Scope of the claim.}{10}{section*.14}%
-\contentsline {paragraph}{Scaling.}{10}{section*.15}%
-\contentsline {section}{\numberline {9}Conclusion and future work}{10}{section.9}%
+\contentsline {paragraph}{Scaling.}{11}{section*.15}%
+\contentsline {section}{\numberline {9}Conclusion and future work}{11}{section.9}%
 \contentsline {section}{References}{11}{section*.16}%

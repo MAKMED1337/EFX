@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.26 (TeX Live 2024) (preloaded format=pdflatex 2025.1.26)  9 JUN 2026 22:26
+This is pdfTeX, Version 3.141592653-2.6-1.40.26 (TeX Live 2024) (preloaded format=pdflatex 2025.1.26)  10 JUN 2026 13:15
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -789,7 +789,7 @@ al/texlive/2024/texmf-dist/fonts/enc/dvips/cm-super/cm-super-t1.enc}])
 [3{/usr/local/texlive/2024/texmf-dist/fonts/enc/dvips/cm-super/cm-super-ts1.enc
 }]
 LaTeX Font Info:    Font shape `T1/cmtt/bx/n' in size <12> not available
-(Font)              Font shape `T1/cmtt/m/n' tried instead on input line 305.
+(Font)              Font shape `T1/cmtt/m/n' tried instead on input line 307.
 
 
 [4]
@@ -804,9 +804,9 @@ File: lstlang1.sty 2024/09/23 1.10c listings language file
 File: lstmisc.sty 2024/09/23 1.10c (Carsten Heinz)
 )
 Package hyperref Info: bookmark level for unknown lstlisting defaults to 0 on i
-nput line 458.
+nput line 460.
 LaTeX Font Info:    Font shape `T1/cmtt/bx/n' in size <9> not available
-(Font)              Font shape `T1/cmtt/m/n' tried instead on input line 460.
+(Font)              Font shape `T1/cmtt/m/n' tried instead on input line 462.
 
 
 [6]
@@ -818,16 +818,19 @@ LaTeX Warning: `h' float specifier changed to `ht'.
 [7]
 
 [8]
-Underfull \hbox (badness 10000) in paragraph at lines 673--674
+Underfull \hbox (badness 10000) in paragraph at lines 700--701
 []\T1/cmr/m/n/10 (+14) Plaut--Roughgarden
  []
+
+
+LaTeX Warning: `h' float specifier changed to `ht'.
 
 
 
 [9]
 
 [10]
-Overfull \hbox (0.52295pt too wide) in paragraph at lines 799--799
+Overfull \hbox (0.52295pt too wide) in paragraph at lines 826--826
 []\T1/cmr/m/n/10.95 (-20) Eric Budish. ``The Combinatorial Assignment Problem: 
 Approximate Competitive Equilibrium
  []
@@ -848,11 +851,11 @@ Package logreq Info: Writing requests to 'efx.run.xml'.
 
  ) 
 Here is how much of TeX's memory you used:
- 22539 strings out of 473207
- 377518 string characters out of 5716288
- 1746943 words of memory out of 5000000
- 45003 multiletter control sequences out of 15000+600000
- 605433 words of font info for 321 fonts, out of 8000000 for 9000
+ 22541 strings out of 473207
+ 377574 string characters out of 5716288
+ 1745998 words of memory out of 5000000
+ 45006 multiletter control sequences out of 15000+600000
+ 605285 words of font info for 320 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  66i,11n,81p,1000b,2160s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </usr/local/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb
@@ -895,10 +898,10 @@ r/sftt0900.pfb></usr/local/texlive/2024/texmf-dist/fonts/type1/public/cm-super/
 sftt1000.pfb></usr/local/texlive/2024/texmf-dist/fonts/type1/public/cm-super/sf
 tt1095.pfb></usr/local/texlive/2024/texmf-dist/fonts/type1/public/cm-super/sftt
 1200.pfb>
-Output written on efx.pdf (12 pages, 674793 bytes).
+Output written on efx.pdf (12 pages, 676435 bytes).
 PDF statistics:
- 556 PDF objects out of 1000 (max. 8388607)
- 456 compressed objects within 5 object streams
- 111 named destinations out of 1000 (max. 500000)
+ 559 PDF objects out of 1000 (max. 8388607)
+ 459 compressed objects within 5 object streams
+ 112 named destinations out of 1000 (max. 500000)
  80537 words of extra memory for PDF output out of 89155 (max. 10000000)
 
