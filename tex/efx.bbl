@@ -353,6 +353,38 @@
       \verb 10.1145/988772.988792
       \endverb
     \endentry
+    \entry{Mahara2024}{article}{}{}
+      \name{author}{1}{}{%
+        {{hash=1ce01c91bd4da9e9afee812241a1265f}{%
+           family={Mahara},
+           familyi={M\bibinitperiod},
+           given={Ryoga},
+           giveni={R\bibinitperiod}}}%
+      }
+      \strng{namehash}{1ce01c91bd4da9e9afee812241a1265f}
+      \strng{fullhash}{1ce01c91bd4da9e9afee812241a1265f}
+      \strng{fullhashraw}{1ce01c91bd4da9e9afee812241a1265f}
+      \strng{bibnamehash}{1ce01c91bd4da9e9afee812241a1265f}
+      \strng{authorbibnamehash}{1ce01c91bd4da9e9afee812241a1265f}
+      \strng{authornamehash}{1ce01c91bd4da9e9afee812241a1265f}
+      \strng{authorfullhash}{1ce01c91bd4da9e9afee812241a1265f}
+      \strng{authorfullhashraw}{1ce01c91bd4da9e9afee812241a1265f}
+      \field{sortinit}{M}
+      \field{sortinithash}{4625c616857f13d17ce56f7d4f97d451}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{Mathematics of Operations Research}
+      \field{note}{A preliminary version appeared in Proc.\ 29th Annual European Symposium on Algorithms (ESA) 2021, LIPIcs vol.\ 204, 66:1--66:15; arXiv:2107.09901}
+      \field{number}{2}
+      \field{title}{Extension of Additive Valuations to General Valuations on the Existence of {EFX}}
+      \field{volume}{49}
+      \field{year}{2024}
+      \field{pages}{1263\bibrangedash 1277}
+      \range{pages}{15}
+      \verb{doi}
+      \verb 10.1287/moor.2022.0044
+      \endverb
+    \endentry
     \entry{deMouraBjorner2008}{inproceedings}{}{}
       \name{author}{2}{}{%
         {{hash=04ffe79f369bf9f16e299fcf4f98e780}{%

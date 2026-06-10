@@ -110,7 +110,12 @@ exists is a major open problem in the area \cite{AmanatidisSurvey2023}.
 \paragraph{State of the art.}
 \EFX{} existence is known in only a handful of regimes. It holds for two agents
 with arbitrary monotone valuations \cite{PlautRoughgarden2020}, and for three
-agents with additive valuations \cite{ChaudhuryGargMehlhorn2024}. For four
+agents with additive valuations \cite{ChaudhuryGargMehlhorn2024}. It also holds,
+for general monotone valuations and any number of agents, whenever the number of
+goods is small relative to the number of agents: Mahara \cite{Mahara2024} proved
+that an \EFX{} allocation always exists when $\goods\leq\agents+3$. For
+$\agents=4$ this already settles all sizes up to $\goods=7$, so the smallest open
+four-agent case is $\goods=\agents+4=8$. For four
 agents, Berger, Cohen, Feldman and Fiat \cite{BergerCohenFeldmanFiat2022} proved
 that an \EFX{} allocation always exists \emph{if at most one good is left
 unallocated} --- an ``almost full'' guarantee --- and, more generally, that with
@@ -438,10 +443,15 @@ Two consequences follow. First, the difficulty is highly sensitive to $\goods$:
 going from $\goods=6$ to $\goods=8$ multiplies the allocation count by about $26$
 and lengthens every constraint, and the running time grows from under a second to
 about $62$ hours (Section~\ref{sec:results}). Second, this sensitivity also means
-the $(4,8)$ run is computationally demanding: the related three-agent /
-seven-good \EFX{} query did not terminate within a $40$-hour budget for the same
-Z3-over-LRA approach \cite{AkramiEtAl2026}, so termination at this scale cannot be
-taken for granted.
+the $(4,8)$ run is computationally demanding: a related three-agent /
+seven-good \EFX{} query did not terminate within a $40$-hour budget for the
+Z3-over-LRA encoding of \cite{AkramiEtAl2026}, so termination at this scale cannot be
+taken for granted. The two encodings are not directly comparable --- theirs is over
+\emph{monotone} valuations (a real variable per bundle, with several thousand
+constraints), whereas ours is \emph{additive} (the $32$ per-good variables of
+\eqref{eq:negation}) --- so their non-termination is suggestive of the difficulty
+rather than a prediction for our search space; but both run Z3 over QF\_LRA at a
+comparable allocation count, which is enough to make the point.
 
 \section{Implementation}
 \label{sec:impl}
@@ -551,7 +561,11 @@ For $(\agents,\goods)=(4,8)$ the solver returned \texttt{unsat}
 positive valuations; Section~\ref{sec:nonneg} lifts it to all non-negative
 profiles. The
 smaller instances $(4,6)$ and $(4,7)$ were solved first and likewise admit a full
-\EFX{} allocation for every profile. Table~\ref{tab:results} summarises the runs.
+\EFX{} allocation for every profile. These two sizes satisfy
+$\goods\leq\agents+3$ and are therefore already covered by Mahara's analytic
+existence theorem \cite{Mahara2024}; we include them as benchmarks --- a check that
+the pipeline reproduces known results --- and only $(4,8)=(\agents,\agents+4)$ is
+new. Table~\ref{tab:results} summarises the runs.
 
 \begin{table}[h]
 \centering
@@ -667,7 +681,15 @@ $w$ is positive, no good is valued at zero, so on $w$ the \EFX$_+$, \EFX$_0$ and
 \section{Related work and novelty}
 \label{sec:related}
 
-Two lines of work are especially close.
+Three lines of work are especially close.
+
+\paragraph{Mahara \cite{Mahara2024}.}
+Mahara proved that an \EFX{} allocation always exists when $\goods\leq\agents+3$,
+even for general monotone valuations. For $\agents=4$ this covers $\goods\leq 7$,
+so the $(4,6)$ and $(4,7)$ rows of Table~\ref{tab:results} were already known
+analytically; we run them only as benchmarks. The first size his theorem does not
+reach for four agents is exactly $\goods=\agents+4=8$, which is the size we settle
+here (for additive valuations).
 
 \paragraph{Berger, Cohen, Feldman and Fiat \cite{BergerCohenFeldmanFiat2022}.}
 They proved that four additive agents always admit an \EFX{} allocation
@@ -687,7 +709,7 @@ counterexample for three agents and eight goods; the counterexample for general
 $n\geq 3,\ m\geq n+5$ is then obtained from this seed by an explicit construction
 rather than by solving. Their Z3 SMT-over-LRA encoding did not terminate within
 $40$ hours for three agents and seven goods (three agents and six goods took about
-$26$ seconds). They explicitly leave the \emph{additive} case open, and their
+$25$ seconds). They explicitly leave the \emph{additive} case open, and their
 computational results do not reach four agents.
 
 \begin{table}[h]
@@ -701,6 +723,8 @@ Plaut--Roughgarden \cite{PlautRoughgarden2020}
   & $2$ & any & monotone & full \EFX{} exists & proof\\
 Chaudhury et al. \cite{ChaudhuryGargMehlhorn2024}
   & $3$ & any & additive & full \EFX{} exists & proof\\
+Mahara \cite{Mahara2024}
+  & any & $\leq n{+}3$ & monotone & full \EFX{} exists & proof\\
 Berger et al. \cite{BergerCohenFeldmanFiat2022}
   & $4$ & any & additive & \emph{almost} full ($\leq 1$ leftover) & proof\\
 Akrami et al. \cite{AkramiEtAl2026}
