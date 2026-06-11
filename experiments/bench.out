@@ -1,0 +1,54 @@
+Building efx_exp.x ...
+=== N=3 M=5 NORMALIZE=0 ===
+N=3 M=5 sym=1 norm=0
+partitions=150
+solving...
+RESULT N=3 M=5 norm=0 sym=1 result=unsat seconds=0.018851
+=== N=3 M=5 NORMALIZE=1 ===
+N=3 M=5 sym=1 norm=1
+partitions=150
+solving...
+RESULT N=3 M=5 norm=1 sym=1 result=unsat seconds=0.0493792
+=== N=3 M=6 NORMALIZE=0 ===
+N=3 M=6 sym=1 norm=0
+partitions=540
+solving...
+RESULT N=3 M=6 norm=0 sym=1 result=unsat seconds=1.33465
+=== N=3 M=6 NORMALIZE=1 ===
+N=3 M=6 sym=1 norm=1
+partitions=540
+solving...
+RESULT N=3 M=6 norm=1 sym=1 result=unsat seconds=4.77599
+=== N=3 M=7 NORMALIZE=0 ===
+N=3 M=7 sym=1 norm=0
+partitions=1806
+solving...
+RESULT N=3 M=7 norm=0 sym=1 result=unsat seconds=137.535
+=== N=3 M=7 NORMALIZE=1 ===
+N=3 M=7 sym=1 norm=1
+partitions=1806
+solving...
+RESULT N=3 M=7 norm=1 sym=1 result=unsat seconds=422.703
+=== N=4 M=6 NORMALIZE=0 ===
+N=4 M=6 sym=1 norm=0
+partitions=1560
+solving...
+RESULT N=4 M=6 norm=0 sym=1 result=unsat seconds=0.629466
+=== N=4 M=6 NORMALIZE=1 ===
+N=4 M=6 sym=1 norm=1
+partitions=1560
+solving...
+RESULT N=4 M=6 norm=1 sym=1 result=unsat seconds=1.2326
+=== N=4 M=7 NORMALIZE=0 ===
+N=4 M=7 sym=1 norm=0
+partitions=8400
+solving...
+RESULT N=4 M=7 norm=0 sym=1 result=unsat seconds=174.692
+=== N=4 M=7 NORMALIZE=1 ===
+N=4 M=7 sym=1 norm=1
+partitions=8400
+solving...
+RESULT N=4 M=7 norm=1 sym=1 result=unsat seconds=294.043
+
+Raw results saved to raw_results.txt
+Now run build the markdown table from raw_results.txt (done by the agent).

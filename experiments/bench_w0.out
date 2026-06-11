@@ -1,0 +1,52 @@
+Building efx_exp3.x ...
+=== N=3 M=5 NORMALIZE=3 ===
+N=3 M=5 sym=1 norm=3
+partitions=150
+solving...
+RESULT N=3 M=5 norm=3 sym=1 result=unsat seconds=0.00995949
+=== N=3 M=6 NORMALIZE=3 ===
+N=3 M=6 sym=1 norm=3
+partitions=540
+solving...
+RESULT N=3 M=6 norm=3 sym=1 result=unsat seconds=0.846717
+=== N=3 M=7 NORMALIZE=3 ===
+N=3 M=7 sym=1 norm=3
+partitions=1806
+solving...
+RESULT N=3 M=7 norm=3 sym=1 result=unsat seconds=62.9437
+=== N=4 M=6 NORMALIZE=3 ===
+N=4 M=6 sym=1 norm=3
+partitions=1560
+solving...
+RESULT N=4 M=6 norm=3 sym=1 result=unsat seconds=0.365932
+=== N=4 M=7 NORMALIZE=3 ===
+N=4 M=7 sym=1 norm=3
+partitions=8400
+solving...
+RESULT N=4 M=7 norm=3 sym=1 result=unsat seconds=190.725
+=== N=3 M=5 NORMALIZE=4 ===
+N=3 M=5 sym=1 norm=4
+partitions=150
+solving...
+RESULT N=3 M=5 norm=4 sym=1 result=unsat seconds=0.0111087
+=== N=3 M=6 NORMALIZE=4 ===
+N=3 M=6 sym=1 norm=4
+partitions=540
+solving...
+RESULT N=3 M=6 norm=4 sym=1 result=unsat seconds=1.17517
+=== N=3 M=7 NORMALIZE=4 ===
+N=3 M=7 sym=1 norm=4
+partitions=1806
+solving...
+RESULT N=3 M=7 norm=4 sym=1 result=unsat seconds=56.2164
+=== N=4 M=6 NORMALIZE=4 ===
+N=4 M=6 sym=1 norm=4
+partitions=1560
+solving...
+RESULT N=4 M=6 norm=4 sym=1 result=unsat seconds=0.461495
+=== N=4 M=7 NORMALIZE=4 ===
+N=4 M=7 sym=1 norm=4
+partitions=8400
+solving...
+RESULT N=4 M=7 norm=4 sym=1 result=unsat seconds=159.043
+Raw results saved to raw_results_w0.txt

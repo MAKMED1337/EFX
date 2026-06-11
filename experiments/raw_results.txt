@@ -1,0 +1,10 @@
+RESULT N=3 M=5 norm=0 sym=1 result=unsat seconds=0.018851
+RESULT N=3 M=5 norm=1 sym=1 result=unsat seconds=0.0493792
+RESULT N=3 M=6 norm=0 sym=1 result=unsat seconds=1.33465
+RESULT N=3 M=6 norm=1 sym=1 result=unsat seconds=4.77599
+RESULT N=3 M=7 norm=0 sym=1 result=unsat seconds=137.535
+RESULT N=3 M=7 norm=1 sym=1 result=unsat seconds=422.703
+RESULT N=4 M=6 norm=0 sym=1 result=unsat seconds=0.629466
+RESULT N=4 M=6 norm=1 sym=1 result=unsat seconds=1.2326
+RESULT N=4 M=7 norm=0 sym=1 result=unsat seconds=174.692
+RESULT N=4 M=7 norm=1 sym=1 result=unsat seconds=294.043

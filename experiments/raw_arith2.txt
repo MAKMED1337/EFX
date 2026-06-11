@@ -1,0 +1,5 @@
+RESULT N=3 M=5 norm=4 arith=2 parallel=0 threads=0 tactic=0 row0min=0 result=unsat seconds=0.00693436
+RESULT N=3 M=6 norm=4 arith=2 parallel=0 threads=0 tactic=0 row0min=0 result=unsat seconds=0.250453
+RESULT N=3 M=7 norm=4 arith=2 parallel=0 threads=0 tactic=0 row0min=0 result=unsat seconds=20.8753
+RESULT N=4 M=6 norm=4 arith=2 parallel=0 threads=0 tactic=0 row0min=0 result=unsat seconds=0.137622
+RESULT N=4 M=7 norm=4 arith=2 parallel=0 threads=0 tactic=0 row0min=0 result=unsat seconds=95.5489

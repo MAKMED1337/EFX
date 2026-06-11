@@ -1,0 +1,26 @@
+=== N=3 M=5 norm4+arith2 ===
+N=3 M=5 sym=1 norm=4 arith=2 parallel=0 threads=0 tactic=0 row0min=0
+partitions=150
+solving...
+RESULT N=3 M=5 norm=4 arith=2 parallel=0 threads=0 tactic=0 row0min=0 result=unsat seconds=0.00693436
+=== N=3 M=6 norm4+arith2 ===
+N=3 M=6 sym=1 norm=4 arith=2 parallel=0 threads=0 tactic=0 row0min=0
+partitions=540
+solving...
+RESULT N=3 M=6 norm=4 arith=2 parallel=0 threads=0 tactic=0 row0min=0 result=unsat seconds=0.250453
+=== N=3 M=7 norm4+arith2 ===
+N=3 M=7 sym=1 norm=4 arith=2 parallel=0 threads=0 tactic=0 row0min=0
+partitions=1806
+solving...
+RESULT N=3 M=7 norm=4 arith=2 parallel=0 threads=0 tactic=0 row0min=0 result=unsat seconds=20.8753
+=== N=4 M=6 norm4+arith2 ===
+N=4 M=6 sym=1 norm=4 arith=2 parallel=0 threads=0 tactic=0 row0min=0
+partitions=1560
+solving...
+RESULT N=4 M=6 norm=4 arith=2 parallel=0 threads=0 tactic=0 row0min=0 result=unsat seconds=0.137622
+=== N=4 M=7 norm4+arith2 ===
+N=4 M=7 sym=1 norm=4 arith=2 parallel=0 threads=0 tactic=0 row0min=0
+partitions=8400
+solving...
+RESULT N=4 M=7 norm=4 arith=2 parallel=0 threads=0 tactic=0 row0min=0 result=unsat seconds=95.5489
+done -> raw_arith2.txt
