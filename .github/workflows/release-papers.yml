@@ -1,0 +1,65 @@
+name: Release paper PDFs
+
+on:
+  push:
+    tags:
+      - "v*"
+      - "paper-*"
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        description: "Release tag to create or update"
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    name: Build and release papers
+    runs-on: ubuntu-latest
+
+    env:
+      RELEASE_TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.tag_name || github.ref_name }}
+      PDF_PATH: tex/efx.pdf
+      RELEASE_ASSET: efx.pdf
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Install TeX dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            latexmk \
+            texlive-latex-base \
+            texlive-latex-recommended \
+            texlive-latex-extra \
+            texlive-fonts-recommended \
+            texlive-bibtex-extra \
+            biber
+
+      - name: Build paper PDF
+        run: make -C tex
+
+      - name: Upload paper artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: paper-pdf
+          path: ${{ env.PDF_PATH }}
+          if-no-files-found: error
+
+      - name: Create or update GitHub release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
+            gh release upload "$RELEASE_TAG" "$PDF_PATH#${RELEASE_ASSET}" --clobber
+          else
+            gh release create "$RELEASE_TAG" "$PDF_PATH#${RELEASE_ASSET}" \
+              --target "$GITHUB_SHA" \
+              --title "$RELEASE_TAG" \
+              --notes "Automated paper PDF release for $RELEASE_TAG."
+          fi
