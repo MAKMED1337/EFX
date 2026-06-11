@@ -1,3 +1,6 @@
+// Copyright (c) 2026 Eduard Tykhoniuk.
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 #include "common.cpp"
 #include <algorithm>
 #include <array>

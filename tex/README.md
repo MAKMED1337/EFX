@@ -1,3 +1,8 @@
+<!--
+Copyright (c) 2026 Eduard Tykhoniuk.
+SPDX-License-Identifier: CC-BY-SA-4.0
+-->
+
 # Praca roczna — EFX for 4 agents and 8 goods
 
 Build the PDF with:

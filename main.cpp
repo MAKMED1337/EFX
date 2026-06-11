@@ -1,5 +1,9 @@
+// Copyright (c) 2026 Eduard Tykhoniuk.
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 #include "common.cpp"
 #include <algorithm>
+#include <cstdlib>
 #include <fstream>
 #include <iostream>
 #include <ostream>
@@ -9,14 +13,12 @@
 #include <vector>
 #include <z3++.h>
 
-const int N = 4;                // number of agents
-const int M = 8;                // number of items
 const bool USE_SYMMETRY = true; // goods-relabelling symmetry break; set false to verify unsorted
 
 // Encode the envy-freeness condition for a given partition.
 // Returns a Z3 Boolean expression that is true iff the partition is envy-free
 // under the current weight variables w[i][j] (agent i's valuation for item j).
-z3::expr nonenvy(z3::context &ctx, const std::vector<std::vector<int>> &partition,
+z3::expr nonenvy(z3::context &ctx, int N, const std::vector<std::vector<int>> &partition,
                  const std::vector<std::vector<z3::expr>> &w) {
     z3::expr_vector constraints(ctx);
     for (int i = 0; i < N; ++i) {
@@ -73,7 +75,7 @@ Variable parse_variable_name(std::string const &name) {
 
 void print_frac(z3::expr f) { std::cout << f.numerator() << "/" << f.denominator() << " "; }
 
-void print(z3::model m) {
+void print(z3::model m, int N, int M) {
     using namespace std;
     using namespace z3;
     vector<vector<expr>> values(N, vector<expr>(M, expr(m.ctx())));
@@ -116,7 +118,25 @@ z3::solver get_solver(z3::context &ctx) {
 #endif
 }
 
-int main() {
+int main(int argc, char **argv) {
+    if (argc != 3) {
+        std::cerr << "Usage: " << argv[0] << " N M\n"
+                  << "  N: number of agents\n"
+                  << "  M: number of goods\n";
+        return 2;
+    }
+
+    int N = std::atoi(argv[1]);
+    int M = std::atoi(argv[2]);
+    if (N <= 0 || M <= 0) {
+        std::cerr << "N and M must be positive integers.\n";
+        return 2;
+    }
+    if (M < N) {
+        std::cerr << "This prover enumerates non-empty bundles, so it requires M >= N.\n";
+        return 2;
+    }
+
 #ifdef PROOF
     // Enable proof generation globally.
     std::cout << "Proof generation ENABLED" << std::endl;
@@ -162,19 +182,18 @@ int main() {
 
     // Build the disjunction.
     z3::expr_vector valid_exprs(ctx);
-    int count = 0;
     for (const auto &part : partitions) {
-        valid_exprs.push_back(nonenvy(ctx, part, w));
+        valid_exprs.push_back(nonenvy(ctx, N, part, w));
     }
     z3::expr or_valid = z3::mk_or(valid_exprs);
     solver.add(!or_valid);
 
-    // Export SMT‑LIB2 for external verification.
+    // Export SMT-LIB2 for external verification.
     std::string smt_name = "proofs/problem_" + std::to_string(N) + "_" + std::to_string(M) + ".smt2";
     std::ofstream smt(smt_name);
     smt << solver.to_smt2() << std::endl;
     smt.close();
-    std::cout << "SMT‑LIB2 script saved to " << smt_name << std::endl;
+    std::cout << "SMT-LIB2 script saved to " << smt_name << std::endl;
 
     std::cout << "Solving..." << std::endl;
     z3::check_result result = solver.check();
@@ -194,7 +213,7 @@ int main() {
         std::cout << "Counterexample found:" << std::endl;
         z3::model m = solver.get_model();
         std::cout << m << std::endl;
-        print(m);
+        print(m, N, M);
     } else {
         std::cout << "Unknown result:" << result << std::endl;
     }

@@ -1,3 +1,6 @@
+# Copyright (c) 2026 Eduard Tykhoniuk.
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 cmake_minimum_required(VERSION 3.16)
 project(soplex_prover LANGUAGES CXX)
 
@@ -109,4 +112,3 @@ message(STATUS "Using SoPlex    : ${SOPEX_LIB}")
 message(STATUS "Using MPFR      : ${MPFR_LIB}")
 message(STATUS "Using GMP       : ${GMP_LIB}")
 message(STATUS "Using Zlib      : ${ZLIB_LIB}")
-

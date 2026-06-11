@@ -10,4 +10,16 @@ wheels/
 .venv
 
 out/
-proofs/
+
+# C/C++ generated executables
+*.x
+
+# LaTeX generated files
+tex/*.aux
+tex/*.bbl
+tex/*.bcf
+tex/*.blg
+tex/*.log
+tex/*.out
+tex/*.run.xml
+tex/*.toc

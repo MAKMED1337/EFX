@@ -1,3 +1,6 @@
+# Copyright (c) 2026 Eduard Tykhoniuk.
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 from typing import Generator, cast
 from z3 import And, ArithRef, Not, Or, Real, Solver, Sum, BoolRef, unsat
 import itertools

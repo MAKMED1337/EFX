@@ -1,3 +1,6 @@
+% Copyright (c) 2026 Eduard Tykhoniuk.
+% SPDX-License-Identifier: CC-BY-SA-4.0
+
 \documentclass[11pt,a4paper]{article}
 
 \usepackage[utf8]{inputenc}
@@ -167,6 +170,10 @@ goods-relabelling symmetry that we find empirically to be needed for the larger
 instances to finish (Section~\ref{sec:impl}), reports the result
 (Section~\ref{sec:results}), and places it against the literature
 (Section~\ref{sec:related}).
+
+\paragraph{Repository.}
+The code, report sources, logs, and retained proof artifacts are available at
+\url{https://github.com/MAKMED1337/EFX}.
 
 \section{Preliminaries}
 \label{sec:prelim}
@@ -465,10 +472,12 @@ Section~\ref{sec:symmetry}; (ii) enumerates the non-empty ordered partitions;
 (iii) builds, for each partition, the conjunction \texttt{nonenvy} of
 constraints \eqref{eq:efxconstraint}; (iv) asserts the negation of their
 disjunction; and (v) calls the solver. The core of the encoding is shown below.
+The instance size is supplied on the command line as \texttt{N M}.
 
 \begin{lstlisting}[language=C++,caption={The \texttt{nonenvy} predicate
 (constraints \eqref{eq:efxconstraint}), from \texttt{main.cpp}.},label={lst:nonenvy}]
 z3::expr nonenvy(z3::context &ctx,
+                 int N,
                  const std::vector<std::vector<int>> &partition,
                  const std::vector<std::vector<z3::expr>> &w) {
   z3::expr_vector constraints(ctx);
@@ -492,13 +501,16 @@ z3::expr nonenvy(z3::context &ctx,
 
 \begin{lstlisting}[language=C++,caption={Assembling and refuting the global
 disjunction, from \texttt{main.cpp}.},label={lst:assemble}]
+int N = std::atoi(argv[1]);                    // number of agents
+int M = std::atoi(argv[2]);                    // number of goods
+
 // First agent's valuations sorted (goods-relabelling symmetry break).
 for (int j = 0; j < M - 1; ++j) solver.add(w[0][j] <= w[0][j + 1]);
 
 auto partitions = ordered_groups(N, M);           // 40824 for (4,8)
 z3::expr_vector valid_exprs(ctx);
 for (const auto &part : partitions)
-  valid_exprs.push_back(nonenvy(ctx, part, w));
+  valid_exprs.push_back(nonenvy(ctx, N, part, w));
 z3::expr or_valid = z3::mk_or(valid_exprs);
 solver.add(!or_valid);                             // assert (*) : no allocation is EFX
 
@@ -730,7 +742,7 @@ Berger et al. \cite{BergerCohenFeldmanFiat2022}
 Akrami et al. \cite{AkramiEtAl2026}
   & $3$ & $7$ & monotone & full \EFX{} exists & SAT\\
 Akrami et al. \cite{AkramiEtAl2026}
-  & $\geq3$ & $\geq n{+}5$ & monotone & \emph{counterexample} & SAT\,+\,constr.\\
+  & $\geq3$ & $\geq n{+}5$ & submodular & \emph{counterexample} & SAT\,+\,constr.\\
 \textbf{This report}
   & $\mathbf{4}$ & $\mathbf{8}$ & \textbf{additive} & \textbf{full \EFX{} exists}
   & \textbf{SMT (LRA)}\\
@@ -804,6 +816,36 @@ partition count and widens every constraint, so $\goods=9$ is well out of reach
 of the present encoding without substantially stronger symmetry breaking or a
 fundamentally different decomposition.
 
+\section{Repository structure and running the code}
+\label{sec:repo}
+
+The public repository is
+\begin{center}
+  \url{https://github.com/MAKMED1337/EFX}.
+\end{center}
+The main files are as follows. \texttt{main.cpp} is the Z3-based prover described
+in Section~\ref{sec:impl}; \texttt{common.cpp} enumerates ordered non-empty
+partitions; \texttt{run-cpp.sh} compiles and runs a C++ source file;
+\texttt{main.py} is an earlier Python/Z3 prototype; \texttt{tex/} contains this
+report and bibliography; \texttt{proofs/} contains retained machine-verification
+artifacts; \texttt{logs/} contains retained solver logs; and \texttt{experiments/}
+contains historical experiment scripts and outputs.
+
+To run the main prover, use
+\begin{lstlisting}[language=bash]
+./run-cpp.sh main.cpp 4 8
+\end{lstlisting}
+The two numeric program arguments are $\agents$ and $\goods$: the number of
+agents and goods in the fixed instance to test. The current implementation
+enumerates ordered partitions into non-empty bundles, so it requires
+$\goods\geq\agents$. The program writes the assembled SMT-LIB~2 query to
+\texttt{proofs/problem\_\agents\_\goods.smt2} and then calls Z3. A
+\texttt{sat} result prints a valuation matrix witnessing a counterexample; an
+\texttt{unsat} result means no such counterexample exists for the encoded
+instance size; and \texttt{unknown} is inconclusive. With proof generation
+enabled at compile time, successful proof extraction writes a corresponding
+\texttt{proofs/proof\_\agents\_\goods.z3} file.
+
 \section{Conclusion and future work}
 \label{sec:conclusion}
 
@@ -848,5 +890,20 @@ Several directions follow naturally:
 \end{itemize}
 
 \printbibliography[heading=bibintoc,title={References}]
+
+\clearpage
+\appendix
+\section{Additional material}
+\label{sec:additional}
+
+The prose of this report is licensed under Creative Commons
+Attribution-ShareAlike 4.0 International (CC BY-SA 4.0). Source-code listings
+included from repository files keep the license stated in those source files.
+
+\lstinputlisting[
+  language=C++,
+  caption={Full source of \texttt{main.cpp}.},
+  label={lst:maincpp-full}
+]{../main.cpp}
 
 \end{document}
